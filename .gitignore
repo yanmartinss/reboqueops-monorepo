@@ -1,0 +1,8 @@
+.superpowers/
+recibo.pdf
+.agents
+.claude
+skills-lock.json
+.env
+.env.*
+!.env.example
