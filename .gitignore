@@ -4,5 +4,4 @@ recibo.pdf
 .claude
 skills-lock.json
 .env
-.env.*
-!.env.example
+node_modules/
