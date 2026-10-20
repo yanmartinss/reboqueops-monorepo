@@ -15,7 +15,7 @@ A skill `superpowers:writing-plans` não está instalada neste projeto; este pla
 ### 1. Monorepo e backend base
 - Modele antes: tabelas `tenant`, `usuario`, `cliente`, `servico` no papel: campos, tipos, chaves e onde entra o id do tenant. IDs são UUID. Dinheiro em centavos. O serviço tem data do serviço e data do pagamento (nula no fiado em aberto).
 - Pronto quando: backend Node/TypeScript sobe, conecta ao banco e as tabelas existem por migração.
-- Decidido pelo desenvolvedor: biblioteca de acesso é **Drizzle** (a mesma do app Expo), por estudo. Atenção: o Drizzle tem schemas por dialeto (`sqliteTable`, `pgTable`); se o banco do backend não for SQLite, os dois schemas serão arquivos diferentes e precisam ficar alinhados.
+- Decidido pelo desenvolvedor (2026-10-20): biblioteca de acesso do backend é **Prisma**, porque a linguagem declarativa do schema (`.prisma`) facilita a modelagem; o Drizzle pareceu difícil. O app Expo **continua com Drizzle** (Prisma não roda no Expo). Consequência aceita: duas ferramentas e dois schemas (Prisma no Postgres, Drizzle `sqliteTable` no celular) que precisam ficar alinhados à mão.
 - Decidido pelo desenvolvedor: em desenvolvimento, o Postgres roda **local em Docker** e a API acessa esse banco. O uso de Docker é também objetivo de estudo.
 - Escolhas a declarar: estrutura do monorepo, como o Docker é configurado (por exemplo, um `docker-compose`), onde ficam as credenciais do banco local.
 
@@ -30,7 +30,7 @@ A skill `superpowers:writing-plans` não está instalada neste projeto; este pla
 - Pronto quando: criar, listar e atualizar serviços e clientes, sempre isolados por tenant. Marcar fiado como pago exige a forma de pagamento escolhida e grava a data de pagamento.
 
 ### 4. App do celular (Expo + SQLite + Drizzle)
-- Modele antes: o esquema local espelha o do backend? O que muda por ser uma cópia local?
+- Modele antes: o esquema local (Drizzle/SQLite) espelha o do backend (Prisma/Postgres)? Como manter os dois alinhados já que as ferramentas são diferentes? O que muda por ser uma cópia local?
 - Pronto quando: o pai (ou você) cadastra um serviço em poucos toques, telefone de cliente antigo preenche nome e endereço, e tudo funciona sem internet.
 - Interface: letra grande e poucos toques. Cores a definir (diferentes dos mockups).
 

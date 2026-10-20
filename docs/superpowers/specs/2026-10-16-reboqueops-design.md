@@ -59,7 +59,7 @@ Ao digitar o telefone de um cliente já cadastrado, o app preenche nome e endere
 Modelo de referência: `recibo.pdf`.
 
 - Cabeçalho fixo: nome da empresa e telefone.
-- Bloco de cima (cliente): recebi de, endereço, valor, **valor por extenso**, referente a (frase gerada: "Reboque de um veículo placa X"), data.
+- Bloco de cima (cliente): recebi de, endereço (**destino do veículo**, não o endereço do cliente), valor, **valor por extenso**, referente a (frase gerada: "Reboque de um veículo placa X"), data.
 - Bloco de baixo (emitente): nome, CPF/RG e assinatura do pai, **sempre iguais**, preenchidos automaticamente.
 - Saída: PDF compartilhável por WhatsApp.
 - O app deve poder gerar o recibo de um serviço já salvo (por exemplo, de um fiado depois que for pago).
@@ -78,7 +78,7 @@ Decidida pelo desenvolvedor, com as justificativas dele:
 
 - **Mobile:** Expo com SQLite local. Drizzle em vez de SQL puro (o desenvolvedor quer testar).
 - **Web:** React. Existe porque a mãe usa iOS e o desenvolvedor não quer pagar a App Store.
-- **Backend:** Node com TypeScript. Motivos: o problema é pequeno e não precisa da estrutura do Java, e o desenvolvedor domina TypeScript.
+- **Backend:** Node com TypeScript e **Prisma** para acesso ao Postgres. Motivos: o problema é pequeno e não precisa da estrutura do Java, e o desenvolvedor domina TypeScript. O Prisma foi escolhido porque a linguagem do schema facilita a modelagem; o Drizzle fica só no app Expo (Prisma não roda lá).
 - **Login e senha:** objetivo de estudo do desenvolvedor, não necessidade do pai.
 - **Offline-first:** o celular grava primeiro no SQLite. Sem internet, o serviço fica pendente e é enviado ao backend quando a conexão volta.
 - **O backend é a fonte dos dados**, não só backup: a web lê e grava nele, e o celular busca nele o que a mãe registrou. O SQLite do celular é uma cópia local.
@@ -90,7 +90,7 @@ Estrutura do repositório: monorepo.
 
 Itens abaixo são escolhas do construtor, não decididas pelo desenvolvedor. Devem ser declaradas como tal:
 
-- Banco do backend (a definir) e biblioteca de acesso.
+- Banco do backend: Postgres (escolha do desenvolvedor). Biblioteca de acesso do backend: Prisma (escolha do desenvolvedor).
 - Estratégia de sincronização (como detectar o que está pendente, o que acontece em conflito raro).
 - Biblioteca de geração de PDF e de valor por extenso.
 - Estrutura de pastas do monorepo e compartilhamento de tipos entre apps.

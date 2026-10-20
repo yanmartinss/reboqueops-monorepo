@@ -25,7 +25,7 @@ Modelo de referência: `recibo.pdf` na raiz.
 
 - Mobile: ?
 - Web: ?
-- Backend: ?
+- Backend: Node + TypeScript + Prisma (escolha do desenvolvedor: a linguagem do schema facilita a modelagem; Drizzle fica só no Expo)
 - Banco de dados: Postgres no backend, rodando local em Docker durante o desenvolvimento. SQLite (Drizzle) no celular.
 - Geração de PDF: ?
 - Estrutura do monorepo: ?
