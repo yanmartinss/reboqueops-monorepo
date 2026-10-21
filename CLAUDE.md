@@ -32,7 +32,8 @@ Modelo de referência: `recibo.pdf` na raiz.
 
 ## Convenções
 
-- Idioma do código (nomes, commits): ?
+- Idioma do código (nomes, commits): inglês (decisão do desenvolvedor). Interface e docs continuam em português.
+- Camadas do backend (decisão do desenvolvedor, por estudo): rota > controller > service. A rota só liga o caminho ao controller; o controller lê a requisição e devolve a resposta HTTP; o service tem a regra de negócio, lança erros (`AppError`) e é o único que fala com o banco (Prisma). O nome correto é **arquitetura em camadas**, não MVC: o service não existe no MVC clássico e a API devolve JSON, sem View. O MVC de verdade (com View) se pratica no front (React). Objetivo de estudo declarado pelo desenvolvedor: aprender como funciona um projeto profissional.
 - Idioma da interface: português do Brasil.
 - Valores em dinheiro: guardar em centavos (inteiro), nunca float.
 - Datas: guardar em UTC, exibir em horário de Fortaleza (America/Fortaleza).

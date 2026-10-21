@@ -6,3 +6,5 @@ skills-lock.json
 .env
 node_modules/
 .windsurf
+reboqueops-api/src/generated/**
+dist/
