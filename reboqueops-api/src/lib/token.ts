@@ -17,13 +17,10 @@ export const signToken = (userId: string) => {
 
 export const verifyToken = (token: string): TokenPayload => {
   let decoded: string | jwt.JwtPayload;
-  try {
-    decoded = jwt.verify(token, jwtSecret, {
-      algorithms: [JWT_ALGORITHM],
-    });
-  } catch {
-    throw new AppError("Invalid token", 401);
-  }
+  decoded = jwt.verify(token, jwtSecret, {
+    algorithms: [JWT_ALGORITHM],
+  });
+
   if (
     typeof decoded === "string" ||
     typeof decoded.sub !== "string" ||

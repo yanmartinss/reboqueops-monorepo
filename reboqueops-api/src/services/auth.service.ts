@@ -2,6 +2,7 @@ import { Prisma } from "../generated/prisma/client.js";
 import { AppError } from "../errors/AppError.js";
 import { hashPassword } from "../lib/password.js";
 import { prisma } from "../lib/prisma.js";
+import { signToken } from "../lib/token.js";
 
 export const createUser = async (userData: {
   name: string;
@@ -13,20 +14,16 @@ export const createUser = async (userData: {
   const hashedPassword = await hashPassword(password);
 
   try {
-    return await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name,
         email,
         passwordHash: hashedPassword,
         tenant: { create: { name: tenantName } },
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        tenant: { select: { id: true, name: true } },
-      },
     });
+    const token = signToken(user.id);
+    return { token };
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
