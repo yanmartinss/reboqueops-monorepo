@@ -3,7 +3,6 @@ import { AppError } from "../errors/AppError.js";
 import { hashPassword, verifyPassword } from "../lib/password.js";
 import { prisma } from "../lib/prisma.js";
 import { signToken } from "../lib/token.js";
-import { findUserByEmail } from "./email.service.js";
 
 export const createUser = async (userData: {
   name: string;
@@ -40,8 +39,13 @@ export const loginUser = async (loginData: {
   email: string;
   password: string;
 }) => {
-  const existingUser = await findUserByEmail(loginData.email);
-  if (!existingUser) throw new AppError("Invalid email or password", 401);
+  const existingUser = await prisma.user.findUnique({
+    where: { email: loginData.email },
+  });
+  if (!existingUser) {
+    await hashPassword(loginData.password); // Prevent timing attacks, making with the password and user error have the same time
+    throw new AppError("Invalid email or password", 401);
+  }
 
   const isPasswordValid = await verifyPassword(
     loginData.password,
