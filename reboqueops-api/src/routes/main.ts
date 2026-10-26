@@ -8,3 +8,4 @@ routes.get("/ping", (req, res) => {
 });
 
 routes.post("/register", authController.register);
+routes.post("/login", authController.login);
