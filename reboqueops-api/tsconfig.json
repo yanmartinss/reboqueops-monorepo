@@ -9,6 +9,6 @@
     "rootDir": "src",
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src", "tests/app.test.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "tests"]
 }
