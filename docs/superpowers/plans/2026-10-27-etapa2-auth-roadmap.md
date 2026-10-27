@@ -24,10 +24,10 @@ Atualizado em 2026-10-27. Marque `[x]` conforme for concluindo e dê commit junt
 
 Testes com **vitest** (decisão do desenvolvedor).
 
-- [ ] 0.1 Separar o app do `listen`: um arquivo exporta o app (rotas, `express.json()`, middleware de erro) e outro só chama `listen`. Conferir que `npm run dev` continua funcionando.
-- [ ] 0.2 Instalar vitest e supertest (mais os tipos do supertest) como devDependencies; criar o script `test`. Anotar por que cada pacote.
-- [ ] 0.3 Teste mínimo: `GET /api/ping` retorna 200. Tem de passar.
-- [ ] 0.4 Decidir o banco dos testes: banco separado (outra `DATABASE_URL`) ou e-mails únicos por execução com limpeza. Decidir também como o vitest recebe `JWT_SECRET` e `DATABASE_URL`.
+- [ X ] 0.1 Separar o app do `listen`: um arquivo exporta o app (rotas, `express.json()`, middleware de erro) e outro só chama `listen`. Conferir que `npm run dev` continua funcionando.
+- [ X ] 0.2 Instalar vitest e supertest (mais os tipos do supertest) como devDependencies; criar o script `test`. Anotar por que cada pacote.
+- [ X ] 0.3 Teste mínimo: `GET /api/ping` retorna 200. Tem de passar.
+- [ X ] 0.4 Decidir o banco dos testes: banco separado (outra `DATABASE_URL`) ou e-mails únicos por execução com limpeza. Decidir também como o vitest recebe `JWT_SECRET` e `DATABASE_URL`.
 - [ ] 0.5 Os 4 testes do login (descrever antes de escrever: usuário inicial, requisição, status e corpo esperados):
   - [ ] senha certa: 200 com `{ token }`
   - [ ] senha errada: 401

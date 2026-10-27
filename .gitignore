@@ -4,6 +4,7 @@ recibo.pdf
 .claude
 skills-lock.json
 .env
+.env.test
 node_modules/
 .windsurf
 reboqueops-api/src/generated/**
