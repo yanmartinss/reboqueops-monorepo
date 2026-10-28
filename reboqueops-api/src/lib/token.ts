@@ -26,7 +26,7 @@ export const verifyToken = (token: string): TokenPayload => {
     typeof decoded.sub !== "string" ||
     typeof decoded.exp !== "number"
   ) {
-    throw new AppError("Invalid token", 401);
+    throw new AppError("Access denied", 401);
   }
   return { sub: decoded.sub, exp: decoded.exp };
 };

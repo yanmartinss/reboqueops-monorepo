@@ -42,29 +42,29 @@ Testes com **vitest** (decisão do desenvolvedor).
 
 Responder antes de codar:
 
-- [ ] Cabeçalho e formato do token de entrada (`Authorization` + prefixo?). Faltando ou mal formado: qual status e mensagem?
-- [ ] Usuário do token não existe mais no banco: qual erro e status (mesma mensagem genérica?).
-- [ ] O que o middleware entrega ao controller (`userId`, `tenantId`), onde isso fica na requisição e como tipar no TypeScript.
-- [ ] Renovação: quando assina o token novo, qual o nome do cabeçalho de resposta, e o que muda com "continuar logado" desligado.
-- [ ] Onde mora "continuar logado": claim dentro do token (recomendação, sem consulta extra ao banco) ou no banco. Qual o padrão da caixinha.
+- [ X ] Cabeçalho e formato do token de entrada (`Authorization` + prefixo?). Faltando ou mal formado: qual status e mensagem?
+- [ X ] Usuário do token não existe mais no banco: qual erro e status (mesma mensagem genérica?).
+- [ X ] O que o middleware entrega ao controller (`userId`, `tenantId`), onde isso fica na requisição e como tipar no TypeScript.
+- [ X ] Renovação: quando assina o token novo, qual o nome do cabeçalho de resposta, e o que muda com "continuar logado" desligado.
+- [ X ] Onde mora "continuar logado": claim dentro do token (recomendação, sem consulta extra ao banco) ou no banco. Qual o padrão da caixinha.
 
 ## Passo 2: "continuar logado" no token e no login
 
-- [ ] `signToken` recebe o id e a escolha de continuar logado; `verifyToken` devolve também essa escolha.
+- [ X ] `signToken` recebe o id e a escolha de continuar logado; `verifyToken` devolve também essa escolha.
 - [ ] Schema do login aceita o campo opcional novo.
 - [ ] Testes do token com os casos de sempre, mais a nova claim.
 
 ## Passo 3: middleware de autenticação
 
-- [ ] Arquivo novo em `src/middlewares/`, usando `verifyToken` e `prisma.user.findUnique` por id.
-- [ ] `userId` e `tenantId` vêm do banco, nunca do corpo nem do token.
-- [ ] Se a renovação está ligada, assina token novo e põe no cabeçalho da resposta.
+- [ X ] Arquivo novo em `src/middlewares/`, usando `verifyToken` e `prisma.user.findUnique` por id.
+- [ X ] `userId` e `tenantId` vêm do banco, nunca do corpo nem do token.
+- [ X ] Se a renovação está ligada, assina token novo e põe no cabeçalho da resposta.
 
 ## Passo 4: `GET /api/me`
 
-- [ ] Rota com o middleware aplicado só nela; controller e service no padrão atual.
-- [ ] Devolve nome, e-mail e tenant (id e nome); nunca `passwordHash` (usar `select`).
-- [ ] Testes: sem token 401; token adulterado 401; token válido 200; usuário apagado 401; cabeçalho novo na resposta.
+- [ X ] Rota com o middleware aplicado só nela; controller e service no padrão atual.
+- [ X ] Devolve nome, e-mail e tenant (id e nome); nunca `passwordHash` (usar `select`).
+- [ X ] Testes: sem token 401; token adulterado 401; token válido 200; usuário apagado 401; cabeçalho novo na resposta.
 
 ## Passo 5: convite da segunda conta (a mãe)
 

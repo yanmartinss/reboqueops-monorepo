@@ -4,6 +4,22 @@ import { hashPassword, verifyPassword } from "../lib/password.js";
 import { prisma } from "../lib/prisma.js";
 import { signToken } from "../lib/token.js";
 
+export const getUserById = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { tenant: true },
+  });
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    tenantId: user.tenantId,
+    tenantName: user.tenant.name,
+  };
+};
+
 export const createUser = async (userData: {
   name: string;
   email: string;

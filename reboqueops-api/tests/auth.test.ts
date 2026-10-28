@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
 import { prisma } from "../src/lib/prisma.js";
@@ -100,5 +100,64 @@ describe("verify token", () => {
     });
 
     expect(payload.sub).toBe(dbUser.id);
+  });
+});
+
+describe("GET /api/me", () => {
+  let token: string;
+
+  beforeEach(async () => {
+    await resetDb();
+    const response = await request(app).post("/api/register").send(user);
+    expect(response.status).toBe(201);
+    token = response.body.token;
+  });
+
+  test("should return 401 without token", async () => {
+    const response = await request(app).get("/api/me");
+
+    expect(response.status).toBe(401);
+  });
+
+  test("should return 401 with tampered token", async () => {
+    const [header, , signature] = token.split(".");
+    const fakePayload = Buffer.from(
+      JSON.stringify({
+        sub: "random-id",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      }),
+    ).toString("base64url");
+    const tampered = `${header}.${fakePayload}.${signature}`;
+
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${tampered}`);
+
+    expect(response.status).toBe(401);
+  });
+
+  test("should return 200 and the user with valid token", async () => {
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      user: {
+        email: user.email,
+        tenantName: user.tenantName,
+      },
+    });
+    expect(response.body).not.toHaveProperty("passwordHash");
+  });
+
+  test("should return 401 when the user was deleted", async () => {
+    await prisma.user.deleteMany({ where: { email: user.email } });
+
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(401);
   });
 });
