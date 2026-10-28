@@ -5,10 +5,10 @@ import { prisma } from "../src/lib/prisma.js";
 import jwt from "jsonwebtoken";
 
 const user = {
-  name: "Teste da Silva",
-  email: "testedasilva@gmail.com",
+  name: "Yan Martins de Sousa",
+  email: "yanmartinsteste@gmail.com",
   password: "123456",
-  tenantName: "Empresa de Teste",
+  tenantName: "Yan Car Reboque",
   rememberMe: true,
 };
 
@@ -436,6 +436,69 @@ describe("GET /api/me", () => {
       .set("Authorization", `Bearer ${login.body.token}`);
 
     expect(response.status).toBe(200);
+  });
+
+  async function loginToken(rememberMe: boolean) {
+    const response = await request(app).post("/api/login").send({
+      email: user.email,
+      password: user.password,
+      rememberMe,
+    });
+
+    expect(response.status).toBe(200);
+    return response.body.token as string;
+  }
+
+  test("should send x-refreshed-token when rememberMe is true", async () => {
+    const loginTokenValue = await loginToken(true);
+
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${loginTokenValue}`);
+
+    expect(response.status).toBe(200);
+    expect(response.headers["x-refreshed-token"]).toBeDefined();
+  });
+
+  test("should not send x-refreshed-token when rememberMe is false", async () => {
+    const loginTokenValue = await loginToken(false);
+
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${loginTokenValue}`);
+
+    expect(response.status).toBe(200);
+    expect(response.headers["x-refreshed-token"]).toBeUndefined();
+  });
+
+  test("refreshed token should be accepted by /api/me with same sub and rememberMe true", async () => {
+    const loginTokenValue = await loginToken(true);
+
+    const first = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${loginTokenValue}`);
+
+    const refreshed = first.headers["x-refreshed-token"];
+    expect(refreshed).toBeDefined();
+
+    const loginPayload = jwt.verify(
+      loginTokenValue,
+      process.env.JWT_SECRET!,
+    ) as jwt.JwtPayload;
+
+    const refreshedPayload = jwt.verify(
+      refreshed,
+      process.env.JWT_SECRET!,
+    ) as jwt.JwtPayload;
+
+    expect(refreshedPayload.sub).toBe(loginPayload.sub);
+    expect(refreshedPayload.rememberMe).toBe(true);
+
+    const second = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${refreshed}`);
+
+    expect(second.status).toBe(200);
   });
 
   test("should return 401 when the user was deleted", async () => {

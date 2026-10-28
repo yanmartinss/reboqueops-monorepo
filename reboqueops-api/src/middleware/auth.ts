@@ -14,19 +14,14 @@ export const authMiddleware = async (
   const token = authHeader.split("Bearer ")[1];
   if (!token) throw new AppError("Access denied", 401);
 
-  let userId: string;
-  try {
-    const decoded = verifyToken(token);
-    if (!decoded.sub) throw new AppError("Access denied", 401);
-    userId = decoded.sub;
-  } catch {
-    throw new AppError("Access denied", 401);
-  }
+  const decoded = verifyToken(token);
+  if (!decoded.sub) throw new AppError("Access denied", 401);
 
-  const user = await getUserById(userId);
+  const user = await getUserById(decoded.sub);
   if (!user) throw new AppError("Access denied", 401);
 
   (req as any).userId = user.id;
   (req as any).tenantId = user.tenantId;
+  (req as any).rememberMe = decoded.rememberMe;
   return next();
 };

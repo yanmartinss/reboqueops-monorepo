@@ -95,10 +95,10 @@ Design antes do código:
 ## Decisões da sessão (2026-10-28)
 
 - **"Lembrar de mim logado" mora no token**, não no banco. Motivo: é propriedade da **sessão**, não do usuário (celular marcado, computador alheio desmarcado). O argumento do "gargalo" não vale: o middleware já consulta o banco a cada requisição.
-- **Padrão marcado** (por causa do pai) e o campo é **obrigatório** no `POST /api/login`, booleano. Quem chama a API sem a tela tem de mandar o campo.
+- **Padrão marcado** (por causa do pai) e o campo é **obrigatório, sem `default`** no `POST /api/login`, booleano (`z.boolean()`). Quem chama a API sem a tela tem de mandar o campo; o corpo sem ele dá 422. Motivo: com `.default(true)` quem esquecesse o campo receberia, em silêncio, um token de 7 dias que se renova. O "marcado por padrão" vive na tela (a caixinha já vem marcada), não na API.
 - **Nome do campo:** `rememberMe` (booleano, obrigatório no login, vai como claim dentro do token).
 - **Modo marcado:** renovação a cada requisição autenticada (e no login), 7 dias contados de novo.
-- **Modo desmarcado:** sem renovação. O `exp` ainda precisa de um número (ver "Em aberto"). "Até a próxima sessão" é comportamento do cliente (onde ele guarda o token); o servidor sempre emite um `exp` finito.
+- **Modo desmarcado:** sem renovação, `exp` de **2 horas** (`signToken` escolhe `"7d"` ou `"2h"` conforme o `rememberMe`). "Até a próxima sessão" é comportamento do cliente (onde ele guarda o token); o servidor sempre emite um `exp` finito.
 - **Token do `register`:** emitido com `rememberMe: true`, igual ao padrão da caixinha.
 - **Cabeçalho do token novo:** `X-Refreshed-Token`. A web precisa de `Access-Control-Expose-Headers: X-Refreshed-Token`. O app mobile (Expo) não passa por CORS. Ainda não existe middleware `cors` no app.
 - **Camadas do middleware:** ele chama `getUserById` (service) e grava no `req` só `userId` e `tenantId`, ambos vindos do banco (nunca do token ou do corpo). O `/me` faz a própria consulta, porque quer mais campos que os ids. As outras rotas protegidas só precisam do `tenantId`.
@@ -109,9 +109,10 @@ Design antes do código:
 
 ## Em aberto (ainda sem decisão)
 
-- Modo **desmarcado**: o `exp` do token (um número: horas ou dias). Sem renovação já está decidido.
 - No cliente (web e app), onde guardar o token do modo desmarcado para ele sumir ao fechar a aba/app. Assunto das etapas web e mobile.
-- O que fazer com os testes de login que não mandam o `rememberMe` (hoje receberão 422).
+- JSON malformado no corpo (por exemplo, vírgula sobrando) hoje dá **500**, porque o middleware de erro só reconhece `AppError`. O erro do parser já traz `statusCode: 400` e `type: "entity.parse.failed"`. Tratar no middleware de erro do `app.ts` e testar. (Está também no Passo 7.)
+- Teste do token do `register` (carrega `rememberMe: true` e dura 7 dias).
+- O `true` fixo em `signToken(user.id, true)` do `createUser` merece nome ou comentário.
 - Salvar (ou não) o script da medição de tempo no repositório.
 - `tenant.service.ts` foi removido por enquanto. Se voltar, justificar a consulta extra frente ao `getUserById` (que já devolve `tenantName`).
 
