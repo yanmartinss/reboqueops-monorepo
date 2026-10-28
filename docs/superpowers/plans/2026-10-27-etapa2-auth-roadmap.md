@@ -28,15 +28,15 @@ Testes com **vitest** (decisão do desenvolvedor).
 - [ X ] 0.2 Instalar vitest e supertest (mais os tipos do supertest) como devDependencies; criar o script `test`. Anotar por que cada pacote.
 - [ X ] 0.3 Teste mínimo: `GET /api/ping` retorna 200. Tem de passar.
 - [ X ] 0.4 Decidir o banco dos testes: banco separado (outra `DATABASE_URL`) ou e-mails únicos por execução com limpeza. Decidir também como o vitest recebe `JWT_SECRET` e `DATABASE_URL`.
-- [ ] 0.5 Os 4 testes do login (descrever antes de escrever: usuário inicial, requisição, status e corpo esperados):
-  - [ ] senha certa: 200 com `{ token }`
-  - [ ] senha errada: 401
-  - [ ] e-mail inexistente: 401 com a mesma mensagem da senha errada
-  - [ ] corpo sem e-mail: 422
-- [ ] 0.6 Teste de que o `sub` do token é o id do usuário no banco.
-- [ ] 0.7 Medir o tempo à parte, em script (não como teste do vitest, para não ficar instável): 10 chamadas com e-mail existente e senha errada vs 10 com e-mail inexistente. As médias devem ficar próximas.
-- [ ] 0.8 `npm run typecheck`, `npm run build`, `npm start` e `GET /api/ping`.
-- [ ] 0.9 Commit em inglês. `git status` sem `dist/`, `src/generated/` ou `.env`.
+- [ X ] 0.5 Os 4 testes do login (descrever antes de escrever: usuário inicial, requisição, status e corpo esperados):
+  - [ X ] senha certa: 200 com `{ token }`
+  - [ X ] senha errada: 401
+  - [ X ] e-mail inexistente: 401 com a mesma mensagem da senha errada
+  - [ X ] corpo sem e-mail: 422
+- [ X ] 0.6 Teste de que o `sub` do token é o id do usuário no banco.
+- [ X ] 0.7 Medir o tempo à parte, em script (não como teste do vitest, para não ficar instável): 10 chamadas com e-mail existente e senha errada vs 10 com e-mail inexistente. As médias devem ficar próximas.
+- [ X ] 0.8 `npm run typecheck`, `npm run build`, `npm start` e `GET /api/ping`.
+- [ X ] 0.9 Commit em inglês. `git status` sem `dist/`, `src/generated/` ou `.env`.
 
 ## Passo 1: desenhar o middleware por escrito
 
