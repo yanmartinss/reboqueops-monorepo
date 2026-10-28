@@ -38,7 +38,7 @@ export const createUser = async (userData: {
         tenant: { create: { name: tenantName } },
       },
     });
-    const token = signToken(user.id);
+    const token = signToken(user.id, true);
     return { token };
   } catch (error) {
     if (
@@ -54,6 +54,7 @@ export const createUser = async (userData: {
 export const loginUser = async (loginData: {
   email: string;
   password: string;
+  rememberMe: boolean;
 }) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: loginData.email },
@@ -69,6 +70,6 @@ export const loginUser = async (loginData: {
   );
   if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
 
-  const token = signToken(existingUser.id);
+  const token = signToken(existingUser.id, loginData.rememberMe);
   return { token };
 };

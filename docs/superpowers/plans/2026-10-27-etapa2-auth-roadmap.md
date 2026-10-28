@@ -1,13 +1,15 @@
 # Etapa 2 (autenticação): o que falta
 
-Atualizado em 2026-10-27. Marque `[x]` conforme for concluindo e dê commit junto com o código.
+Atualizado em 2026-10-28. Marque `[x]` conforme for concluindo e dê commit junto com o código.
 
 ## Onde paramos
 
-- Cadastro (`POST /api/register`) e login (`POST /api/login`) existem e estão commitados.
-- Cadastro provado à mão (201 com token, 409 para e-mail repetido, sem tenant órfão).
-- Login com erro genérico (401) e proteção de tempo, **ainda não provado**.
-- Não existe teste automatizado nem script `test` no `package.json`.
+- Cadastro (`POST /api/register`), login (`POST /api/login`), middleware de autenticação e `GET /api/me` existem e estão commitados.
+- App separado do `listen` (`src/app.ts` monta, `src/server.ts` liga na porta).
+- Testes automáticos com vitest + supertest em `tests/` (`npm test`), contra um banco separado `reboqueops_test` (container `postgres-test` na porta 5433, dados em memória, `.env.test` na raiz, trava que recusa rodar fora de um banco `_test`).
+- `npm run build` + `npm start` provados com ping, login e `/me` (200).
+- Medição de tempo do login feita (e-mail inexistente vs senha errada).
+- Falta: "lembrar de mim logado" (token e login), renovação do token no middleware, convite da segunda conta e teste de isolamento entre tenants.
 
 ## Decisões já tomadas
 
@@ -51,8 +53,8 @@ Responder antes de codar:
 ## Passo 2: "continuar logado" no token e no login
 
 - [ X ] `signToken` recebe o id e a escolha de continuar logado; `verifyToken` devolve também essa escolha.
-- [ ] Schema do login aceita o campo opcional novo.
-- [ ] Testes do token com os casos de sempre, mais a nova claim.
+- [ X ] Schema do login aceita o campo novo.
+- [ X ] Testes do token com os casos de sempre, mais a nova claim.
 
 ## Passo 3: middleware de autenticação
 
@@ -90,6 +92,38 @@ Design antes do código:
 - [ ] Definir o estilo de commits no `CLAUDE.md`.
 - [ ] Registrar no spec as decisões desta etapa (renovação, risco aceito, camadas sem repositório). Pedir ao Claude para editar.
 
+## Decisões da sessão (2026-10-28)
+
+- **"Lembrar de mim logado" mora no token**, não no banco. Motivo: é propriedade da **sessão**, não do usuário (celular marcado, computador alheio desmarcado). O argumento do "gargalo" não vale: o middleware já consulta o banco a cada requisição.
+- **Padrão marcado** (por causa do pai) e o campo é **obrigatório** no `POST /api/login`, booleano. Quem chama a API sem a tela tem de mandar o campo.
+- **Nome do campo:** `rememberMe` (booleano, obrigatório no login, vai como claim dentro do token).
+- **Modo marcado:** renovação a cada requisição autenticada (e no login), 7 dias contados de novo.
+- **Modo desmarcado:** sem renovação. O `exp` ainda precisa de um número (ver "Em aberto"). "Até a próxima sessão" é comportamento do cliente (onde ele guarda o token); o servidor sempre emite um `exp` finito.
+- **Token do `register`:** emitido com `rememberMe: true`, igual ao padrão da caixinha.
+- **Cabeçalho do token novo:** `X-Refreshed-Token`. A web precisa de `Access-Control-Expose-Headers: X-Refreshed-Token`. O app mobile (Expo) não passa por CORS. Ainda não existe middleware `cors` no app.
+- **Camadas do middleware:** ele chama `getUserById` (service) e grava no `req` só `userId` e `tenantId`, ambos vindos do banco (nunca do token ou do corpo). O `/me` faz a própria consulta, porque quer mais campos que os ids. As outras rotas protegidas só precisam do `tenantId`.
+- **`as any` no `req` adiado.** Precisa estar decidido antes da primeira consulta que filtra por `req.tenantId` (Etapa 3). Motivo: o Prisma ignora `undefined` dentro de `where`, então um erro de digitação em `req.tenantId` poderia devolver dados de todos os tenants.
+- **Gerador do Prisma com `importFileExtension = "js"`** no `schema.prisma`, para o cliente gerado ser importável pelo Node em `npm start`. Depois de mudar o schema, rodar `prisma generate` (não `migrate`: `generate` refaz o código do cliente, `migrate` altera o banco).
+- **`postinstall: prisma generate`** no `package.json`, para o notebook gerar o cliente sozinho após `npm install`. Risco: em deploy com `npm install --omit=dev` o comando `prisma` (devDependency) não existe e o install falha. Decidir antes do primeiro deploy.
+- **Commits:** separar por assunto (o que conserta o `start` num commit, a limpeza do middleware em outro).
+
+## Em aberto (ainda sem decisão)
+
+- Modo **desmarcado**: o `exp` do token (um número: horas ou dias). Sem renovação já está decidido.
+- No cliente (web e app), onde guardar o token do modo desmarcado para ele sumir ao fechar a aba/app. Assunto das etapas web e mobile.
+- O que fazer com os testes de login que não mandam o `rememberMe` (hoje receberão 422).
+- Salvar (ou não) o script da medição de tempo no repositório.
+- `tenant.service.ts` foi removido por enquanto. Se voltar, justificar a consulta extra frente ao `getUserById` (que já devolve `tenantName`).
+
+## Atenção: caixinhas marcadas que o código ainda não sustenta
+
+Conferido em 2026-10-28 nos arquivos. Desmarque ou conclua:
+
+- Passo 1: "Renovação (cabeçalho, nome)" e "onde mora continuar logado": o desenho está acima, mas o nome do cabeçalho e o modo desmarcado seguem em aberto.
+- Passo 2: "`signToken` recebe a escolha de continuar logado": hoje é `signToken(userId)` com `7d` fixo, sem claim de "lembrar".
+- Passo 3: "renovação assina novo token e põe no cabeçalho": não há `setHeader`/`res.set` em `src/`.
+- Passo 4: teste do "cabeçalho novo na resposta": não existe em `tests/`. Também o tipo do `userId` no `Request` segue `as any` (adiado).
+
 ## Verificação ponta a ponta (fim da etapa)
 
 Cadastro → token → `GET /api/me` com o token → dados do próprio usuário e tenant; login → token; convite cria usuário no mesmo tenant; segundo tenant isolado; `npm run typecheck`, `npm run build`, `npm start` e `/api/ping` sem erro; `git status` sem `dist/`, `src/generated/` ou `.env`.
@@ -97,6 +131,7 @@ Cadastro → token → `GET /api/me` com o token → dados do próprio usuário 
 ## Para retomar no notebook
 
 1. `git pull` e `npm install` em `reboqueops-api`.
-2. Criar o `.env` na raiz a partir do `.env.example` (o `.env` não vai para o git; copie os valores por um canal seguro, não por commit).
-3. `docker compose up -d` na raiz, depois `npx prisma generate` e `npx prisma migrate dev` (o Postgres do notebook começa vazio).
-4. Abrir este arquivo e continuar do primeiro `[ ]` sem marcar.
+2. Criar o `.env` na raiz a partir do `.env.example` (o `.env` não vai para o git; copie os valores por um canal seguro, não por commit) e o `.env.test` a partir do `.env.test.example`.
+3. `docker compose up -d` na raiz (sobe o Postgres de dev e o de teste), depois `npx prisma migrate dev` (o Postgres do notebook começa vazio). O `prisma generate` roda sozinho no `npm install` (`postinstall`); se mudar o `schema.prisma`, rode `npx prisma generate` à mão.
+4. Em `reboqueops-api`: `npm run typecheck` e `npm test` (tem de dar tudo verde antes de começar). Scripts rodam dentro de `reboqueops-api`, não na raiz.
+5. Abrir este arquivo e continuar do primeiro `[ ]` sem marcar.

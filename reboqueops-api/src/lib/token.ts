@@ -6,12 +6,12 @@ if (!jwtSecret) throw new Error("JWT_SECRET environment variable is not set.");
 
 const JWT_ALGORITHM: jwt.Algorithm = "HS256";
 
-export type TokenPayload = { sub: string; exp: number };
+export type TokenPayload = { sub: string; exp: number; rememberMe: boolean };
 
-export const signToken = (userId: string) => {
-  return jwt.sign({ sub: userId }, jwtSecret, {
+export const signToken = (userId: string, rememberMe: boolean) => {
+  return jwt.sign({ sub: userId, rememberMe }, jwtSecret, {
     algorithm: JWT_ALGORITHM,
-    expiresIn: "7d",
+    expiresIn: rememberMe ? "7d" : "2h",
   });
 };
 
@@ -24,9 +24,10 @@ export const verifyToken = (token: string): TokenPayload => {
   if (
     typeof decoded === "string" ||
     typeof decoded.sub !== "string" ||
-    typeof decoded.exp !== "number"
+    typeof decoded.exp !== "number" ||
+    typeof decoded.rememberMe !== "boolean"
   ) {
     throw new AppError("Access denied", 401);
   }
-  return { sub: decoded.sub, exp: decoded.exp };
+  return { sub: decoded.sub, exp: decoded.exp, rememberMe: decoded.rememberMe };
 };
