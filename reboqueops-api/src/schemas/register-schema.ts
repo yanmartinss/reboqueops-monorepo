@@ -17,3 +17,5 @@ export const registerSchema = z.object({
     .min(1, "Tenant name is required")
     .max(20, "Tenant name must be at most 20 characters long"),
 });
+
+export type CreateUserInput = z.infer<typeof registerSchema>;

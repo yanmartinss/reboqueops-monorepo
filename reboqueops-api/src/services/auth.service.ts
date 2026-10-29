@@ -3,6 +3,8 @@ import { AppError } from "../errors/AppError.js";
 import { hashPassword, verifyPassword } from "../lib/password.js";
 import { prisma } from "../lib/prisma.js";
 import { signToken } from "../lib/token.js";
+import { CreateUserInput } from "../schemas/register-schema.js";
+import { LoginUserSchema } from "../schemas/login-schema.js";
 
 export const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -17,15 +19,11 @@ export const getUserById = async (userId: string) => {
     email: user.email,
     tenantId: user.tenantId,
     tenantName: user.tenant.name,
+    role: user.role,
   };
 };
 
-export const createUser = async (userData: {
-  name: string;
-  email: string;
-  password: string;
-  tenantName: string;
-}) => {
+export const createUser = async (userData: CreateUserInput) => {
   const { name, email, password, tenantName } = userData;
   const hashedPassword = await hashPassword(password);
 
@@ -35,6 +33,7 @@ export const createUser = async (userData: {
         name,
         email,
         passwordHash: hashedPassword,
+        role: "OWNER",
         tenant: { create: { name: tenantName } },
       },
     });
@@ -51,11 +50,7 @@ export const createUser = async (userData: {
   }
 };
 
-export const loginUser = async (loginData: {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}) => {
+export const loginUser = async (loginData: LoginUserSchema) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: loginData.email },
   });

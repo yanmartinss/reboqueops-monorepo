@@ -511,3 +511,45 @@ describe("GET /api/me", () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe("User role", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  test("should ignore role in register body and create user with OWNER", async () => {
+    const response = await request(app)
+      .post("/api/register")
+      .send({ ...user, role: "MEMBER" });
+
+    expect(response.status).toBe(201);
+
+    const dbUser = await prisma.user.findUniqueOrThrow({
+      where: { email: user.email },
+    });
+
+    expect(dbUser.role).toBe("OWNER");
+  });
+
+  test("should create user with role OWNER on registration", async () => {
+    await request(app).post("/api/register").send(user);
+
+    const dbUser = await prisma.user.findUniqueOrThrow({
+      where: { email: user.email },
+    });
+
+    expect(dbUser.role).toBe("OWNER");
+  });
+
+  test("should return user role OWNER in GET /api/me", async () => {
+    const register = await request(app).post("/api/register").send(user);
+    const token = register.body.token;
+
+    const response = await request(app)
+      .get("/api/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.user.role).toBe("OWNER");
+  });
+});

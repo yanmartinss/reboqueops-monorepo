@@ -26,8 +26,9 @@ export const authMiddleware = async (
 
   if (!user) throw new AppError("Access denied", 401);
 
-  (req as any).userId = user.id;
-  (req as any).tenantId = user.tenantId;
+  req.userId = user.id;
+  req.tenantId = user.tenantId;
+  req.role = user.role;
 
   if (decoded.rememberMe)
     res.setHeader("X-Refreshed-Token", signToken(user.id, decoded.rememberMe));

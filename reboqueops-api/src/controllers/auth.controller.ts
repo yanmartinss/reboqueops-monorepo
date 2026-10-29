@@ -25,7 +25,7 @@ export const login: RequestHandler = async (req, res) => {
 };
 
 export const getMe: RequestHandler = async (req, res) => {
-  const userId = (req as any).userId;
+  const userId = req.userId;
   if (!userId) throw new AppError("Access denied", 401);
   const user = await getUserById(userId);
 
