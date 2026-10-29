@@ -87,6 +87,14 @@ Faça nesta ordem, **teste primeiro** em cada passo, um commit por passo:
 - [ ] 5.5 **`POST` de aceitar convite** (público): token válido cria o usuário no **mesmo tenant** como membro, em uma transação, e marca o convite como usado; token usado, vencido ou inválido é rejeitado; e-mail que ganhou conta no meio do caminho dá 409; regras de senha iguais às do cadastro.
 - [ ] 5.6 Teste de isolamento (Passo 6) usando o convite: o convite do tenant A nunca cria usuário no tenant B.
 
+Decisões do convite (2026-10-29):
+
+- Convite **amarrado a um e-mail**; vale **2 horas**; sempre cria um **membro** (a tabela `Invitation` não tem coluna `role`).
+- Tabela `Invitation`: `tokenHash` (único), `email`, `expiresAt`, `acceptedAt` (nulo = não usado), `invitedBy` + `tenantId` com chave composta para `User(id, tenantId)` (o banco impede convite de um tenant com `invitedBy` de outro), `onDelete: Cascade` (convite pendente de usuário/tenant que some perde o sentido; o histórico dos já aceitos some junto), `@@index([tenantId])`.
+- O token é **aleatório de 32 bytes** (`crypto.randomBytes`, nunca `Math.random`). A segurança vem da aleatoriedade, não do hash; o hash (SHA-256, rápido) só evita guardar o link em texto no banco. Senha usa bcrypt porque é curta e escolhida por uma pessoa.
+- Resposta do **criar convite** (201, só para o dono): `token` em texto (única vez em que existe), `expiresAt` e `email`. **Só o token**, o link é montado no front (a segurança está no token; montar no back exigiria uma variável com o endereço do front, e há dois fronts). Nunca devolve `tokenHash` nem dados de senha.
+- Fila da rota: `authMiddleware` → `requireOwner` → controller.
+
 Perguntas do 5.0 (responder por escrito):
 
 1. O convite fica **amarrado a um e-mail** ou o link é livre? (Amarrado é mais seguro: qual ataque ele evita?)

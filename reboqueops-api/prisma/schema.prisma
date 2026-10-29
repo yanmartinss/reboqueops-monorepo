@@ -14,13 +14,14 @@ datasource db {
 }
 
 model Tenant {
-  id        String     @id @default(uuid())
-  name      String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  users     User[]
-  services  Service[]
-  customers Customer[]
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  users       User[]
+  services    Service[]
+  customers   Customer[]
+  invitations Invitation[]
 }
 
 enum Role {
@@ -38,8 +39,10 @@ model User {
   updatedAt    DateTime @updatedAt
   role         Role     @default(MEMBER)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  invitations Invitation[]
 
+  @@unique([id, tenantId])
   @@index([tenantId])
 }
 
@@ -85,4 +88,21 @@ model Service {
 
   @@index([tenantId, serviceDate])
   @@index([customerId])
+}
+
+model Invitation {
+  id         String    @id @default(uuid())
+  tenantId   String
+  email      String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  invitedBy  String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invitedByUser User   @relation(fields: [invitedBy, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@index([tenantId])
 }
